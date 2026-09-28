@@ -5,11 +5,12 @@
 //! it would place, so every decision can be tested with plain `cargo test`,
 //! on your own machine, before any money is involved.
 
-use std::collections::BTreeMap;
+use strategy_sdk::{Account, AccountState, Action, Decimal, Order, Side, decimal};
 
-use strategy_sdk::{Account, AccountState, Action, Decimal, Order, Side, from_payload};
+use crate::config;
 
-/// The manifest's `[config]`, as the agent reads it.
+/// The agent's settings, as decimals. [`Settings::default`] reads them from
+/// `config.rs`; tests build their own to try other numbers.
 #[derive(Clone, Debug)]
 pub struct Settings {
     /// The one market it trades.
@@ -24,36 +25,21 @@ pub struct Settings {
     pub max_order_fraction: Decimal,
 }
 
-impl Settings {
-    /// Read what `run` is handed: the manifest's `[config]` as a map of
-    /// strings, with decimals as text so two machines can't round the same
-    /// number differently. Anything missing or unreadable falls back to the
-    /// default written here, rather than stopping the agent.
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        let map: BTreeMap<String, String> = if bytes.is_empty() {
-            BTreeMap::new()
-        } else {
-            from_payload(bytes)?
-        };
-        let number = |key: &str, fallback: &str| -> Decimal {
-            map.get(key)
-                .and_then(|text| text.parse().ok())
-                .unwrap_or_else(|| fallback.parse().expect("a default written down here"))
-        };
-        Ok(Self {
-            market: map
-                .get("market")
-                .cloned()
-                .unwrap_or_else(|| "ETH-PERP".to_string()),
-            target_exposure: number("target_exposure", "0.5"),
-            max_exposure: number("max_exposure", "1.0"),
-            rebalance_band: number("rebalance_band", "0.05"),
-            max_order_fraction: number("max_order_fraction", "0.05"),
-        })
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            market: config::MARKET.to_string(),
+            target_exposure: decimal(config::TARGET_EXPOSURE),
+            max_exposure: decimal(config::MAX_EXPOSURE),
+            rebalance_band: decimal(config::REBALANCE_BAND),
+            max_order_fraction: decimal(config::MAX_ORDER_FRACTION),
+        }
     }
+}
 
+impl Settings {
     /// The target, kept inside the limits: never short, never above the most
-    /// the agent will hold, whatever the config says.
+    /// the agent will hold, whatever the settings say.
     pub fn target(&self) -> Decimal {
         clamp(self.target_exposure, zero(), self.max_exposure)
     }

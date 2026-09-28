@@ -4,7 +4,7 @@ A small, complete trading agent for [Shonin](https://docs.shonin.fi): build it, 
 
 The agent is a **rebalancer**. It holds a target exposure to one market, half the vault's value long ETH by default, and trades back towards it when the market moves it too far away. It's small enough to read in one sitting, and real enough to show everything an agent needs: limits kept in code, a restart that loses nothing, and a clean exit when its vault stops.
 
-The docs page [Write an agent](https://docs.shonin.fi/hands-on/write/) explains the ideas behind it. This README walks through the files.
+The [Writing an Agent](https://docs.shonin.fi/writing/getting-started/) section of the docs explains the ideas behind it. This README walks through the files.
 
 ## Getting started
 
@@ -33,23 +33,27 @@ The docs page [Write an agent](https://docs.shonin.fi/hands-on/write/) explains 
 
 ## The files
 
-### `shonin.toml`: the manifest
+### `shonin.toml`: the configuration
 
-What the agent is and what it promises, in five parts:
+What the agent is and what it promises, for the platform. Your agent never reads it.
 
-- **`[strategy]`**: its `id`, unique among your agents, and every bridge it uses (none here).
-- **`[description]`**: its title, a plain description, and its **limits** in plain words. These are promises: the AI Review checks your code keeps them.
-- **`[config]`**: the numbers the agent reads when it starts. Here: the market, the target exposure, the most it will ever hold, how far it may drift before trading, and the largest single order.
-- **`[venues]`**: where it trades, and which of the vault's accounts it uses.
-- **`[runtime.allowances]`**: the computing and gas it may use, which is what its tank can be charged. You can change these on a live vault later.
+- **`[description]`**: its title, a plain description, and its **claims** in plain words. These are promises: the AI Review checks your code keeps them.
+- **`[venues.hyperliquid]`**: where it trades, from the [supported venues](https://docs.shonin.fi/reference/venues/).
+- **`[bridges.<name>]`**: one for every bridge it uses to move money between chains. It trades on one chain, so it has none.
 
-Everything except the allowances is fixed for the life of the vault once you publish.
+It gets its id automatically when you publish.
+
+It's fixed once you publish. How much computing and gas the agent may use isn't in here: you choose that when you publish, and can change it on the live vault.
+
+### `src/config.rs`: the settings
+
+The numbers the agent decides with, as constants: the market, the target exposure, the most it will ever hold, how far it may drift before trading, and the largest single order.
 
 ### `src/decide.rs`: the decisions
 
 Every decision the agent makes, as plain functions of what the venue reports. Nothing here waits or sends anything, which is what makes it testable.
 
-- **`Settings`** reads the manifest's `[config]`, falling back to defaults written here, and holds the target inside the limits whatever the config says.
+- **`Settings`** reads `config.rs` as exact decimals, and holds the target inside the limits whatever the settings say.
 - **`exposure`** works out how much of the vault is held in the market.
 - **`rebalance`** returns one step back towards the target: a single order no larger than the order limit, and never a short. A big gap closes over several steps, one per event.
 - **`flatten`** closes everything at once, for when the vault is stopping.
@@ -60,19 +64,19 @@ The agent's one long-lived `run`. It waits on two streams, the venue's news abou
 
 ### `tests/decide.rs`: the tests
 
-Each test builds an account the way a venue would report it and checks what the agent would do: nothing inside the band, one capped buy below the target, a reduce-only sell above it, no short ever. One more test reads `shonin.toml` and fails if its config ever drifts from the defaults in `decide.rs`.
+Each test builds an account the way a venue would report it and checks what the agent would do: nothing inside the band, one capped buy below the target, a reduce-only sell above it, no short ever.
 
 ## Making it yours
 
-1. **Name it.** Change `id` and the `[description]` in `shonin.toml`.
-2. **Decide what it does.** Rewrite `src/decide.rs`, and add tests beside the ones here as you go.
-3. **Keep your config and your code together.** Every `[config]` key needs a matching field and default in `Settings`; the drift test holds you to it.
-4. **Promise only what you enforce.** Every line in `limits` should be something your code makes true. The AI Review reads both and rates you down for a promise the code doesn't keep.
-5. **Set your venue and allowances** in `shonin.toml`, and change `VENUE` in `src/lib.rs` to match.
+1. **Name it.** Change the `[description]` in `shonin.toml`: its `title` is the name people see.
+2. **Set its numbers** in `src/config.rs`.
+3. **Decide what it does.** Rewrite `src/decide.rs`, and add tests beside the ones here as you go.
+4. **Claim only what you enforce.** Every line in `claims` should be something your code makes true. The AI Review reads both and rates you down for a promise the code doesn't keep.
+5. **Choose your venue** from the [supported venues](https://docs.shonin.fi/reference/venues/): its table in `shonin.toml`, and `VENUE` in `src/lib.rs`.
 
 ## Publishing
 
-When `cargo test` passes and the component builds, publish it from the web app: pay the $1 deposit plus whatever you want in your agent's tank, and upload this folder. [Publish an agent](https://docs.shonin.fi/hands-on/publish/) has the details.
+When `cargo test` passes and the component builds, publish it from the web app: pay the $1 deposit plus whatever you want in your agent's tank, choose how much computing it may use, and upload this folder. [Publishing](https://docs.shonin.fi/writing/publishing/) has the details.
 
 ## License
 

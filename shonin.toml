@@ -1,34 +1,16 @@
-[strategy]
-id = "rebalancer"
-bridges = []                   # every bridge the agent uses, disclosed on its page
-
 [description]
 title = "Rebalancer"
 text = """
 Holds a target exposure to one market and trades back towards it when \
 the market moves it too far away.
 """
-limits = [
+claims = [
     "Exposure never above the vault's value",
     "No single order above 5% of the vault",
-    "Trades one market, named in the config, and nothing else",
+    "Trades one market, and nothing else",
 ]
 
-[config]
-market             = "ETH-PERP"
-target_exposure    = "0.5"     # half the vault's value, long
-max_exposure       = "1.0"     # never more than the vault's value
-rebalance_band     = "0.05"    # trade when exposure drifts this far
-max_order_fraction = "0.05"    # no single order above 5% of the vault
-
 [venues.hyperliquid]
-accounts = ["main"]
 
-[runtime.allowances]
-fuel_per_sec         = 1_000_000
-memory_mib           = 128
-requests_per_min     = 60
-bytes_per_day        = 10_000_000
-streams              = 2
-inference_ms_per_min = 0
-gas_usd_per_day      = "0"     # Hyperliquid charges no gas for orders
+# One [bridges.<name>] table for each bridge the agent uses; it trades on one
+# chain, so it has none.
