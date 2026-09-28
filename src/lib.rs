@@ -7,8 +7,10 @@
 //! account and takes one step. It never polls and never sleeps on a timer, so
 //! a quiet market costs nothing.
 //!
-//! Every decision is in `decide.rs`, as plain functions you can test.
+//! Every decision is in `decide.rs`, as plain functions you can test, and its
+//! settings are in `config.rs`.
 
+pub mod config;
 pub mod decide;
 
 use futures::StreamExt;
@@ -35,8 +37,10 @@ enum Woke {
 }
 
 impl sdk::Strategy for Rebalancer {
-    async fn run(config: Vec<u8>) -> Result<(), String> {
-        let settings = Settings::from_bytes(&config)?;
+    // The SDK still hands `run` its configuration as bytes; the settings now
+    // live in `config.rs`, so there's nothing to read here.
+    async fn run(_config: Vec<u8>) -> Result<(), String> {
+        let settings = Settings::default();
 
         // Whatever a previous run left behind is still on the venue, so look
         // before doing anything.

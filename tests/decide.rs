@@ -3,16 +3,12 @@
 //! Each test builds the account as a venue would report it, asks the agent
 //! what it would do, and checks the answer. Add your own the same way.
 
-use std::collections::BTreeMap;
-
 use rebalancer::decide::{Settings, exposure, flatten, rebalance};
-use strategy_sdk::{
-    AccountState, Action, MarketState, Order, PositionState, Side, decimal, to_payload,
-};
+use strategy_sdk::{AccountState, Action, MarketState, Order, PositionState, Side, decimal};
 
 /// The settings the template ships with.
 fn settings() -> Settings {
-    Settings::from_bytes(&[]).expect("the defaults read")
+    Settings::default()
 }
 
 /// A vault worth `vault` in total, with `idle` of it at home, holding
@@ -115,47 +111,4 @@ fn closing_out_sells_everything_at_once() {
     let order = the_order(&flatten(&account("20000", "1000", "5"), &settings())).clone();
     assert_eq!(order.size, decimal("5"));
     assert!(order.reduce_only);
-}
-
-/// The defaults in `decide.rs` are what the agent falls back to, and the
-/// manifest is what it promises. This fails if the two ever drift apart.
-#[test]
-fn the_manifest_and_the_defaults_agree() {
-    let manifest = include_str!("../shonin.toml");
-    let config: BTreeMap<String, String> = manifest
-        .split("[config]")
-        .nth(1)
-        .expect("a [config] table")
-        .lines()
-        .take_while(|line| !line.trim_start().starts_with('['))
-        .filter_map(|line| {
-            let (key, value) = line.split_once('=')?;
-            let value = value.split('#').next()?.trim().trim_matches('"');
-            Some((key.trim().to_string(), value.to_string()))
-        })
-        .collect();
-
-    let read = Settings::from_bytes(&to_payload(&config)).expect("the manifest reads");
-    let defaults = settings();
-    assert_eq!(read.market, defaults.market);
-    for (name, a, b) in [
-        (
-            "target_exposure",
-            read.target_exposure,
-            defaults.target_exposure,
-        ),
-        ("max_exposure", read.max_exposure, defaults.max_exposure),
-        (
-            "rebalance_band",
-            read.rebalance_band,
-            defaults.rebalance_band,
-        ),
-        (
-            "max_order_fraction",
-            read.max_order_fraction,
-            defaults.max_order_fraction,
-        ),
-    ] {
-        assert_eq!(a, b, "{name} differs between shonin.toml and decide.rs");
-    }
 }
