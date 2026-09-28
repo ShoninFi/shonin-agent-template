@@ -1,0 +1,26 @@
+[package]
+name = "rebalancer"
+description = "Holds a target exposure to one market, and trades back towards it"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+# A component for the platform, and an ordinary library for your tests.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+shonin-strategy-sdk = "0.1.0"
+futures = "0.3.34"
+
+[lints.rust]
+unsafe_code = "deny"
+
+[profile.release]
+# Small and reproducible: the builder compiles exactly this profile.
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
