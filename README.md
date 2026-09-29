@@ -37,9 +37,9 @@ The [Writing an Agent](https://docs.shonin.fi/writing/getting-started/) section 
 
 What the agent is and what it promises, for the platform. Your agent never reads it.
 
-- **`[vault]`**: the `chain` its vault lives on, where Depositors put money in and take it out, from the [vault chains](https://docs.shonin.fi/writing/vault-and-drivers/#vault-chains). It trades on Hyperliquid, so its vault lives there too.
+- **`[vault]`**: the `chain` its vault lives on, where Depositors put money in and take it out, from the [vault chains](https://docs.shonin.fi/writing/configuration/#vault). It trades on Hyperliquid, so its vault lives there too.
 - **`[description]`**: its title, a plain description, and its **claims** in plain words. These are promises: the AI Review checks your code keeps them.
-- **`[drivers.hyperliquid]`**: the [driver](https://docs.shonin.fi/writing/vault-and-drivers/#drivers) it trades through.
+- **`[drivers.hyperliquid]`**: the [driver](https://docs.shonin.fi/writing/drivers/) it trades through.
 - **`[bridges.<name>]`**: one for every bridge it uses to move money between chains. It trades on one chain, so it has none.
 
 It gets its id automatically when you publish.
@@ -52,7 +52,7 @@ The numbers the agent decides with, as constants: the market, the target exposur
 
 ### `src/decide.rs`: the decisions
 
-Every decision the agent makes, as plain functions of what the exchange reports. Nothing here waits or sends anything, which is what makes it testable.
+Every decision the agent makes, as plain functions of what the venue reports. Nothing here waits or sends anything, which is what makes it testable.
 
 - **`Settings`** reads `config.rs` as exact decimals, and holds the target inside the limits whatever the settings say.
 - **`exposure`** works out how much of the vault is held in the market.
@@ -61,7 +61,7 @@ Every decision the agent makes, as plain functions of what the exchange reports.
 
 ### `src/lib.rs`: the waiting and the sending
 
-The agent's one long-lived `run`. It waits on two streams, the exchange's news about the vault's account and the vault's own events, and on each one it reads the account and takes a step. It remembers nothing between steps: every decision starts from what the exchange says is there, so a rejected order or a restart can never leave it believing something false. When the vault says it's halting, it closes out and stops.
+The agent's one long-lived `run`. It waits on two streams, the venue's news about the vault's account and the vault's own events, and on each one it reads the account and takes a step. It remembers nothing between steps: every decision starts from what the venue says is there, so a rejected order or a restart can never leave it believing something false. When the vault says it's halting, it closes out and stops.
 
 ### `data/`: files the agent reads
 
@@ -69,7 +69,7 @@ This agent doesn't need any, but if yours reads files of its own, such as a tabl
 
 ### `tests/decide.rs`: the tests
 
-Each test builds an account the way an exchange would report it and checks what the agent would do: nothing inside the band, one capped buy below the target, a reduce-only sell above it, no short ever.
+Each test builds an account the way a venue would report it and checks what the agent would do: nothing inside the band, one capped buy below the target, a reduce-only sell above it, no short ever.
 
 ## Making it yours
 
@@ -77,7 +77,7 @@ Each test builds an account the way an exchange would report it and checks what 
 2. **Set its numbers** in `src/config.rs`.
 3. **Decide what it does.** Rewrite `src/decide.rs`, and add tests beside the ones here as you go.
 4. **Claim only what you enforce.** Every line in `claims` should be something your code makes true. The AI Review reads both and rates you down for a promise the code doesn't keep.
-5. **Choose your driver** from the [driver list](https://docs.shonin.fi/writing/vault-and-drivers/#drivers): its table in `shonin.toml`, and `VENUE` in `src/lib.rs`. Set the `[vault]` `chain` to where your vault should live, and add a bridge if the driver trades on another chain.
+5. **Choose your driver** from the [driver list](https://docs.shonin.fi/writing/drivers/): its table in `shonin.toml`, and `VENUE` in `src/lib.rs`. Set the `[vault]` `chain` to where your vault should live, and add a bridge if the driver trades on another chain.
 
 ## Publishing
 
