@@ -1,3 +1,6 @@
+[vault]
+chain = "hyperliquid"
+
 [description]
 title = "Rebalancer"
 text = """
@@ -10,7 +13,7 @@ claims = [
     "Trades one market, and nothing else",
 ]
 
-[venues.hyperliquid]
+[drivers.hyperliquid]
 
 # One [bridges.<name>] table for each bridge the agent uses; it trades on one
 # chain, so it has none.
