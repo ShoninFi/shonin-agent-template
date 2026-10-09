@@ -77,7 +77,7 @@ Each test builds an account the way a venue would report it and checks what the 
 2. **Set its numbers** in `src/config.rs`.
 3. **Decide what it does.** Rewrite `src/decide.rs`, and add tests beside the ones here as you go.
 4. **Claim only what you enforce.** Every line in `claims` should be something your code makes true. The AI Review reads both and rates you down for a promise the code doesn't keep.
-5. **Choose your driver** from the [driver list](https://docs.shonin.fi/writing/drivers/): its table in `shonin.toml`, and `VENUE` in `src/lib.rs`. Set the `[vault]` `chain` to where your vault should live, and add a bridge if the driver trades on another chain.
+5. **Choose your driver** from the [driver list](https://docs.shonin.fi/writing/drivers/) (`hyperliquid` for Hyperliquid's perpetuals and spot, `robinhood` for stock tokens on Robinhood Chain, `lighter` for Lighter's perpetuals, `orca` for liquidity and swaps in Orca's pools on Solana): its table in `shonin.toml`, and `VENUE` in `src/lib.rs`. Set the `[vault]` `chain` to where your vault should live, and add a bridge if the driver trades on another chain.
 
 ## Publishing
 

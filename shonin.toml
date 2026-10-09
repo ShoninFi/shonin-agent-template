@@ -10,7 +10,7 @@ the market moves it too far away.
 claims = [
     "Exposure never above the vault's value",
     "No single order above 5% of the vault",
-    "Trades one market, and nothing else",
+    "Trades one market, the ETH perpetual, and nothing else",
 ]
 
 [drivers.hyperliquid]
