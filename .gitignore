@@ -3,7 +3,7 @@
 # ==========================================================================
 
 /target
-# Written by you while the SDK is not yet on crates.io; see the README.
+# Written by you to point at the SDK the build service uses; see the README.
 /.cargo/config.toml
 
 # Secrets never belong in the source: seal them from the agent's page.

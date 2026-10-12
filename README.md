@@ -17,7 +17,7 @@ The [Writing an Agent](https://docs.shonin.fi/writing/getting-started/) section 
 
 2. **Install Rust** from [rustup.rs](https://rustup.rs). `rust-toolchain.toml` pins the exact compiler and the `wasm32-wasip2` target, and `cargo` fetches both the first time you build.
 
-3. **Point at the SDK.** Until `shonin-strategy-sdk` is published on crates.io, resolve it from a checkout of the Shonin platform by creating `.cargo/config.toml` (it's gitignored):
+3. **Point at the SDK the build service uses.** [`shonin-strategy-sdk`](https://crates.io/crates/shonin-strategy-sdk) is on crates.io (reference on [docs.rs](https://docs.rs/shonin-strategy-sdk); the WIT it binds is [`wit/agent.wit`](https://github.com/ShoninFi/shonin-platform/blob/main/packages/strategy-sdk/wit/agent.wit)). The build service compiles every agent against its own copy of it, and for now expects your `Cargo.lock` to hold the SDK as a path package, so resolve it from a checkout of the [Shonin platform](https://github.com/ShoninFi/shonin-platform) by creating `.cargo/config.toml` (it's gitignored):
 
     ```toml
     [patch.crates-io]
