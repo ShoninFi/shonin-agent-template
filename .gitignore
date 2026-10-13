@@ -3,8 +3,6 @@
 # ==========================================================================
 
 /target
-# Written by you to point at the SDK the build service uses; see the README.
-/.cargo/config.toml
 
 # Secrets never belong in the source: seal them from the agent's page.
 .env
